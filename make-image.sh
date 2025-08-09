@@ -59,7 +59,7 @@ add_tunnel_packages() {
 PACKAGES+=" luci-app-diskman kmod-usb-storage kmod-usb-storage-uas ntfs-3g"
 
 # Monitoring
-PACKAGES+=" internet-detector internet-detector-mod-modem-restart luci-app-internet-detector vnstat2 -vnstati2 luci-app-netmonitor luci-app-rakitanmanager"
+PACKAGES+=" internet-detector internet-detector-mod-modem-restart luci-app-internet-detector vnstat2 -vnstati2 luci-app-netmonitor"
 
 # Remote Access
 PACKAGES+=" tailscale luci-app-tailscale"
