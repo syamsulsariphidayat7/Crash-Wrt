@@ -13,8 +13,7 @@ declare -A REPOS
 REPOS+=(
     ["OPENWRT"]="https://downloads.openwrt.org/releases/packages-${VEROP}/${ARCH_3}"
     ["IMMORTALWRT"]="https://downloads.immortalwrt.org/releases/packages-${VEROP}/${ARCH_3}"
-    # ["KIDDIN9"]="https://dl.openwrt.ai/releases/24.10/packages/${ARCH_3}/kiddin9"
-    ["KIDDIN9"]="https://dl.openwrt.ai/latest/packages/$ARCH_3/kiddin9"
+    ["KIDDIN9"]="https://dl.openwrt.ai/releases/24.10/packages/${ARCH_3}/kiddin9"
     ["GSPOTX2F"]="https://github.com/gSpotx2f/packages-openwrt/raw/refs/heads/master/current"
     ["FANTASTIC"]="https://fantastic-packages.github.io/packages/releases/${VEROP}/packages/x86_64"
     ["DLLKIDS"]="https://op.dllkids.xyz/packages/${ARCH_3}"
@@ -32,6 +31,7 @@ packages_custom+=(
     "modeminfo-serial-xmm_|${REPOS[KIDDIN9]}"
     "modeminfo-serial-fibocom_|${REPOS[KIDDIN9]}"
     "modeminfo-serial-sierra_|${REPOS[KIDDIN9]}"
+    "luci-app-adguardhome_|${REPOS[KIDDIN9]}"
     #"luci-app-mmconfig_|${REPOS[OPENWRTRU]}"
     
     "atinout_|${REPOS[KIDDIN9]}"
@@ -47,13 +47,13 @@ packages_custom+=(
     "tailscale_|${REPOS[KIDDIN9]}"
     
     "luci-app-oled_|${REPOS[KIDDIN9]}"
-    "modemband_|${REPOS[KIDDIN9]}"
-    "luci-app-ramfree_|${REPOS[KIDDIN9]}"
-    "luci-app-modemband_|${REPOS[KIDDIN9]}"
-    "luci-app-sms-tool-js_|${REPOS[KIDDIN9]}"
-    "dns2tcp_|${REPOS[KIDDIN9]}"
-    "luci-theme-argon_|${REPOS[KIDDIN9]}"
-    #"luci-app-irqbalance_|${REPOS[KIDDIN9]}"
+    "modemband_|${REPOS[IMMORTALWRT]}/packages"
+    "luci-app-ramfree_|${REPOS[IMMORTALWRT]}/luci"
+    "luci-app-modemband_|${REPOS[IMMORTALWRT]}/luci"
+    "luci-app-sms-tool-js_|${REPOS[IMMORTALWRT]}/luci"
+    "dns2tcp_|${REPOS[IMMORTALWRT]}/packages"
+    # "luci-theme-argon_|${REPOS[IMMORTALWRT]}/luci"
+    #"luci-app-irqbalance_|${REPOS[IMMORTALWRT]}/luci"
     
     "speedtest-cli_|${REPOS[KIDDIN9]}"
     "luci-app-eqosplus_|${REPOS[KIDDIN9]}"
@@ -67,7 +67,7 @@ packages_custom+=(
     "luci-app-droidnet_|https://api.github.com/repos/animegasan/luci-app-droidmodem/releases/latest"
     "luci-theme-alpha_|https://api.github.com/repos/derisamedia/luci-theme-alpha/releases/latest"
     "luci-app-tailscale_|https://api.github.com/repos/asvow/luci-app-tailscale/releases/latest"
-    # "luci-app-rakitanmanager_|https://api.github.com/repos/rtaserver/RakitanManager/releases/latest"
+    "luci-app-rakitanmanager_|https://api.github.com/repos/rtaserver/RakitanManager/releases/latest"
     "luci-app-ipinfo_|https://api.github.com/repos/bobbyunknown/luci-app-ipinfo/releases/latest"
 )
 

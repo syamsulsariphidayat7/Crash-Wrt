@@ -32,7 +32,7 @@ kmod-usb3 usb-modeswitch xmm-modem kmod-nls-utf8 kmod-macvlan"
 PACKAGES+=" modeminfo luci-app-modeminfo atinout modemband luci-app-modemband sms-tool luci-app-sms-tool-js picocom minicom"
 
 # ModemInfo Serial Support
-PACKAGES+=" modeminfo-serial-dell modeminfo-serial-fibocom modeminfo-serial-sierra modeminfo-serial-tw modeminfo-serial-xmm"
+PACKAGES+=" modeminfo-serial-dell modeminfo-serial-fibocom modeminfo-serial-sierra modeminfo-serial-tw modeminfo-serial-xmm luci-app-adguardhome"
 
 # VPN Tunnel
 OPENCLASH="coreutils-nohup bash ca-certificates ipset ip-full libcap libcap-bin ruby ruby-yaml kmod-tun kmod-inet-diag kmod-nft-tproxy luci-app-openclash"
@@ -59,7 +59,7 @@ add_tunnel_packages() {
 PACKAGES+=" luci-app-diskman kmod-usb-storage kmod-usb-storage-uas ntfs-3g"
 
 # Monitoring
-PACKAGES+=" internet-detector internet-detector-mod-modem-restart luci-app-internet-detector vnstat2 vnstati2 luci-app-netmonitor"
+PACKAGES+=" internet-detector internet-detector-mod-modem-restart luci-app-internet-detector vnstat2 -vnstati2 luci-app-netmonitor luci-app-rakitanmanager"
 
 # Remote Access
 PACKAGES+=" tailscale luci-app-tailscale"

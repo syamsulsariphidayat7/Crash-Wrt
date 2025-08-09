@@ -220,7 +220,7 @@ fi
 log_status "INFO" "Setting up misc settings and permissions..."
 sed -i -e 's/\[ -f \/etc\/banner \] && cat \/etc\/banner/#&/' -e 's/\[ -n \"\$FAILSAFE\" \] && cat \/etc\/banner.failsafe/& || \/usr\/bin\/foundx/' /etc/profile 2>/dev/null
 chmod -R +x /sbin /usr/bin 2>/dev/null
-chmod +x /etc/init.d/vnstat_backup 2>/dev/null
+# chmod +x /etc/init.d/vnstat_backup 2>/dev/null
 chmod +x /etc/init.d/issue 2>/dev/null
 chmod +x /usr/lib/ModemManager/connection.d/10-report-down 2>/dev/null
 chmod +x /www/cgi-bin/reset-vnstat.sh /www/vnstati/vnstati.sh 2>/dev/null
@@ -298,7 +298,7 @@ log_status "SUCCESS" "VnStati script executed"
 
 # setup enable services
 log_status "INFO" "Enable Services.."
-/etc/init.d/vnstat_backup enable >/dev/null 2>&1
+# /etc/init.d/vnstat_backup enable >/dev/null 2>&1
 /etc/init.d/issue enable >/dev/null 2>&1
 log_status "SUCCESS" "Services enabled"
 

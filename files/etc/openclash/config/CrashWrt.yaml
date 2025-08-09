@@ -1,0 +1,385 @@
+---
+proxy-providers:
+  AKUN ID:
+    type: file
+    path: "./proxy_provider/INDO.yaml"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: '180'
+  AKUN SG:
+    type: file
+    path: "./proxy_provider/VPN.yaml"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: '180'
+proxy-groups:
+- name: Indonesia
+  type: load-balance
+  strategy: round-robin
+  lazy: false
+  disable-udp: false
+  use:
+  - AKUN ID
+  url: https://cp.cloudflare.com/generate_204
+  interval: '200'
+- name: Singapore
+  type: load-balance
+  strategy: round-robin
+  lazy: false
+  disable-udp: false
+  use:
+  - AKUN SG
+  url: https://cp.cloudflare.com/generate_204
+  interval: '200'
+- name: INTERNET
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - Indonesia
+  - Singapore
+- name: WhatsApp Call Only
+  type: url-test
+  disable-udp: false
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: WhatsApp Media
+  type: url-test
+  disable-udp: false
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: E-Wallet & Bank
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  - AKUN SG
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: Marketplace-ID
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  - AKUN SG
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: Koneksi-ID(Netflix-Vidio-Disney-dll)
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  proxies:
+  - INTERNET
+  - Indonesia
+  - DIRECT
+- name: Gaming TCP
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  - AKUN SG
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: Gaming UDP
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  - AKUN SG
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+  - DIRECT
+- name: Block ADS(LITE)
+  type: url-test
+  disable-udp: false
+  use:
+  - AKUN ID
+  - AKUN SG
+  proxies:
+  - REJECT
+  - INTERNET
+  - Indonesia
+  - Singapore
+- name: Bypass
+  type: url-test
+  disable-udp: false
+  proxies:
+  - INTERNET
+  - Indonesia
+  - Singapore
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7895
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: '12345'
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+ipv6: false
+geodata-mode: true
+geodata-loader: memconservative
+tcp-concurrent: true
+unified-delay: true
+find-process-mode: 'off'
+global-client-fingerprint: chrome
+keep-alive-interval: 15
+keep-alive-idle: 600
+dns:
+  enable: true
+  ipv6: false
+  prefer-h3: false
+  use-hosts: true
+  use-system-hosts: true
+  default-nameserver:
+  - 1.1.1.1#eth2
+  enhanced-mode: fake-ip
+  listen: 0.0.0.0:7874
+  nameserver:
+  - 1.1.1.1#Indonesia
+  - 8.8.8.8#Singapore
+  fallback:
+  - 1.0.0.1#Indonesia
+  - 8.8.4.4#Singapore
+  proxy-server-nameserver:
+  - 112.215.198.248#eth2
+  - 112.215.198.254#eth2
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+  - "*.lan"
+  - "*.localdomain"
+  - "*.example"
+  - "*.invalid"
+  - "*.localhost"
+  - "*.test"
+  - "*.local"
+  - "*.home.arpa"
+  - time.*.com
+  - time.*.gov
+  - time.*.edu.cn
+  - time.*.apple.com
+  - time-ios.apple.com
+  - time1.*.com
+  - time2.*.com
+  - time3.*.com
+  - time4.*.com
+  - time5.*.com
+  - time6.*.com
+  - time7.*.com
+  - ntp.*.com
+  - ntp1.*.com
+  - ntp2.*.com
+  - ntp3.*.com
+  - ntp4.*.com
+  - ntp5.*.com
+  - ntp6.*.com
+  - ntp7.*.com
+  - "*.time.edu.cn"
+  - "*.ntp.org.cn"
+  - "+.pool.ntp.org"
+  - time1.cloud.tencent.com
+  - music.163.com
+  - "*.music.163.com"
+  - "*.126.net"
+  - musicapi.taihe.com
+  - music.taihe.com
+  - songsearch.kugou.com
+  - trackercdn.kugou.com
+  - "*.kuwo.cn"
+  - api-jooxtt.sanook.com
+  - api.joox.com
+  - joox.com
+  - y.qq.com
+  - "*.y.qq.com"
+  - streamoc.music.tc.qq.com
+  - mobileoc.music.tc.qq.com
+  - isure.stream.qqmusic.qq.com
+  - dl.stream.qqmusic.qq.com
+  - aqqmusic.tc.qq.com
+  - amobile.music.tc.qq.com
+  - "*.xiami.com"
+  - "*.music.migu.cn"
+  - music.migu.cn
+  - "+.msftconnecttest.com"
+  - "+.msftncsi.com"
+  - msftconnecttest.com
+  - msftncsi.com
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - "+.srv.nintendo.net"
+  - "*.n.n.srv.nintendo.net"
+  - "+.stun.playstation.net"
+  - xbox.*.*.microsoft.com
+  - "*.*.xboxlive.com"
+  - xbox.*.microsoft.com
+  - xnotify.xboxlive.com
+  - "+.battlenet.com.cn"
+  - "+.wotgame.cn"
+  - "+.wggames.cn"
+  - "+.wowsgame.cn"
+  - "+.wargaming.net"
+  - proxy.golang.org
+  - stun.*.*
+  - stun.*.*.*
+  - "+.stun.*.*"
+  - "+.stun.*.*.*"
+  - "+.stun.*.*.*.*"
+  - "+.stun.*.*.*.*.*"
+  - heartbeat.belkin.com
+  - "*.linksys.com"
+  - "*.linksyssmartwifi.com"
+  - "*.router.asus.com"
+  - mesu.apple.com
+  - swscan.apple.com
+  - swquery.apple.com
+  - swdownload.apple.com
+  - swcdn.apple.com
+  - swdist.apple.com
+  - lens.l.google.com
+  - stun.l.google.com
+  - "+.nflxvideo.net"
+  - "*.square-enix.com"
+  - "*.finalfantasyxiv.com"
+  - "*.ffxiv.com"
+  - "*.ff14.sdo.com"
+  - ff.dorado.sdo.com
+  - "*.mcdn.bilivideo.cn"
+  - "+.media.dssott.com"
+  - shark007.net
+  - "+.qq.com"
+  - "+.tencent.com"
+  - na.b.g-tun.com
+  - Mijia Cloud
+  - "+.cmbchina.com"
+  - "+.cmbimg.com"
+  - local.adguard.org
+  - "+.sandai.net"
+  - "+.n0808.com"
+  respect-rules: true
+  fake-ip-filter-mode: blacklist
+profile:
+  store-selected: true
+  store-fake-ip: true
+sniffer:
+  enable: true
+  override-destination: true
+  sniff:
+    HTTP:
+      port:
+      - '80'
+      - '8080'
+      - '8880'
+      - '2052'
+      - '2082'
+      - '2086'
+      - '2092'
+      override-destination: true
+    TLS:
+      port:
+      - '443'
+      - '2053'
+      - '2083'
+      - '2087'
+      - '2096'
+      - '8443'
+      override-destination: true
+    QUIC:
+      port:
+      - '443'
+      - '8443'
+      override-destination: true
+  force-domain:
+  - "+.netflix.com"
+  - "+.nflxvideo.net"
+  - "+.amazonaws.com"
+  - "+.media.dssott.com"
+  skip-domain:
+  - "+.apple.com"
+  - Mijia Cloud
+  - dlg.io.mi.com
+  - "+.oray.com"
+  - "+.sunlogin.net"
+  parse-pure-ip: true
+  force-dns-mapping: true
+rules:
+- GEOIP,private,DIRECT,no-resolve
+#AdsBlock
+- RULE-SET,R-Bypass,Bypass
+- RULE-SET,R-Apple,Bypass
+- GEOSITE,rule-ads,Block ADS(LITE)
+- GEOSITE,rule-umum,INTERNET
+#Zerotier
+- OR,((GEOSITE,rule-umum),(DST-PORT,9993/29994/40775/43215)),INTERNET
+#BANK
+- RULE-SET,R-Bank,E-Wallet & Bank
+- GEOSITE,bank-id,E-Wallet & Bank
+#Marketplace-ID
+- GEOSITE,ecommerce-id,Marketplace-ID
+- DST-PORT,20443,Marketplace-ID
+- DOMAIN,content.garena.com,Marketplace-ID
+#INDO-ONLY
+- GEOSITE,rule-indo,Koneksi-ID(Netflix-Vidio-Disney-dll)
+- GEOIP,netflix,Koneksi-ID(Netflix-Vidio-Disney-dll)
+#Spotify
+- DST-PORT,4070,Koneksi-ID(Netflix-Vidio-Disney-dll),tcp
+- DST-PORT,4070,Koneksi-ID(Netflix-Vidio-Disney-dll),udp
+#WhatsApp
+- GEOSITE,whatsapp,WhatsApp Media
+- RULE-SET,R-Whatsapp,WhatsApp Call Only
+#GAMING
+- AND,((RULE-SET,R-Portgames),(NETWORK,TCP)),Gaming TCP
+- AND,((RULE-SET,R-Portgames),(NETWORK,UDP)),Gaming UDP
+- AND,((NOT,((RULE-SET,R-Umum))),(NETWORK,TCP)),Gaming TCP
+- AND,((GEOSITE,rule-gaming),(NETWORK,TCP)),Gaming TCP
+- AND,((GEOSITE,rule-gaming),(NETWORK,UDP)),Gaming UDP
+- AND,((NOT,((RULE-SET,R-Umum))),(NETWORK,UDP)),Gaming UDP
+#Koneksi Umum
+- RULE-SET,R-Umum,INTERNET
+rule-providers:
+  R-Whatsapp:
+    type: file
+    behavior: classical
+    path: "./rule_provider/R-Whatsapp.yaml"
+  R-Umum:
+    type: file
+    behavior: classical
+    path: "./rule_provider/R-Umum.yaml"
+  R-Bank:
+    type: file
+    behavior: classical
+    path: "./rule_provider/R-Bank.yaml"
+  R-Bypass:
+    type: file
+    behavior: classical
+    path: "./rule_provider/R-Bypass.yaml"
+  R-Portgames:
+    type: file
+    behavior: classical
+    path: "./rule_provider/R-Portgames.yaml"
+  R-Apple:
+    type: file
+    behavior: domain
+    path: "./rule_provider/R-Apple.yaml"
