@@ -1,0 +1,5 @@
+
+config mac-todong
+	option enabled '1'
+	option eth1 '5C:92:5E:D8:E1:11'
+

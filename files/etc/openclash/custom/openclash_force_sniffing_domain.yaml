@@ -1,0 +1,5 @@
+force-domain:
+  - '+.netflix.com'
+  - '+.nflxvideo.net'
+  - '+.amazonaws.com'
+  - '+.media.dssot.com'
