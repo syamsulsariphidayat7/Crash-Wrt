@@ -120,7 +120,7 @@ rules:
 - MATCH,SERVER-UMUM
 dns:
   proxy-server-nameserver:
-    - dhcp://usb0 # eth1 wwan0
+    - dhcp://eth2 # eth1 wwan0
     - 192.168.42.129 # ganti ip modemmu
   nameserver:
     - 1.1.1.1

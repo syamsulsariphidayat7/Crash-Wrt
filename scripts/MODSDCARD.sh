@@ -194,10 +194,10 @@ main() {
     local builds=()
     if [[ "$MATRIXTARGET" == "Amlogic s905x HG680P MODSDCARD" ]]; then
         builds=(
-            "_s905x_k5.15.189:meson-gxl-s905x-p212.dtb:s905x_HG680P"
-            "_s905x_k6.1.66:meson-gxl-s905x-p212.dtb:s905x_HG680P"
-            "_s905x_k6.6.101:meson-gxl-s905x-p212.dtb:s905x_HG680P"
-            "_s905x_k6.12.41:meson-gxl-s905x-p212.dtb:s905x_HG680P"
+            "_s905x_k5.15.189:meson-gxl-s905x-p212.dtb:HG680P"
+            "_s905x_k6.1.66:meson-gxl-s905x-p212.dtb:HG680P"
+            "_s905x_k6.6.101:meson-gxl-s905x-p212.dtb:HG680P"
+            "_s905x_k6.12.41:meson-gxl-s905x-p212.dtb:HG680P"
         )
     elif [[ "$MATRIXTARGET" == "Amlogic s905x B860H MODSDCARD" ]]; then
         builds=(

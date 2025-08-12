@@ -201,8 +201,20 @@ chmod +x /etc/init.d/issue 2>/dev/null
 chmod +x /usr/lib/ModemManager/connection.d/10-report-down 2>/dev/null
 chmod +x /www/cgi-bin/reset-vnstat.sh /www/vnstati/vnstati.sh 2>/dev/null
 chmod 600 /etc/vnstat.conf 2>/dev/null
-chmod +x /root/install2.sh 2>/dev/null
-/root/install2.sh 2>/dev/null
+
+# issue not booting
+log_status "INFO" "Adding and running install2 script..."
+if [ -f "/root/install2.sh" ]; then
+    chmod +x /root/install2.sh 2>/dev/null
+    if /root/install2.sh; then
+        log_status "SUCCESS" "install2 script executed successfully"
+    else
+        log_status "ERROR" "Failed to execute install2 script"
+    fi
+else
+    log_status "WARNING" "install2.sh not found, skipping configuration"
+fi
+
 log_status "SUCCESS" "Misc settings configured"
 
 # add auto sinkron jam, Clean Cache, Remove mm tty
@@ -210,6 +222,64 @@ log_status "INFO" "Add Auto Sinkron Jam, Clean Cache, Remove mm tty..."
 sed -i '/exit 0/i #sh /usr/bin/autojam.sh bug.com' /etc/rc.local 2>/dev/null
 rm -f /etc/hotplug.d/tty/25-modemmanager-tty 2>/dev/null
 log_status "SUCCESS" "Auto sync, cache settings, remove mm tty applied"
+
+# setup device amlogic
+# /etc/uci-defaults/99-hg680pctl.sh
+# Autostart LED mode + Netwatch untuk HG680P
+
+log_status "INFO" "Checking for Amlogic device configuration..."
+if opkg list-installed 2>/dev/null | grep -q luci-app-amlogic; then
+    log_status "INFO" "luci-app-amlogic detected"
+    rm -f /etc/profile.d/30-sysinfo.sh 2>/dev/null
+    
+log_status "[INFO] Mengatur hg680pctl..."
+
+# Pastikan file hg680pctl ada
+if [ -f /usr/bin/hg680pctl ]; then
+    chmod +x /usr/bin/hg680pctl
+
+    # Autostart di rc.local
+    if ! grep -q '/usr/bin/hg680pctl power heart' /etc/rc.local; then
+        sed -i '/exit 0/i \/usr\/bin\/hg680pctl power heart &' /etc/rc.local
+    fi
+    if ! grep -q '/usr/bin/hg680pctl lan disko' /etc/rc.local; then
+        sed -i '/exit 0/i \/usr\/bin\/hg680pctl lan disko &' /etc/rc.local
+    fi
+
+    # Buat script netwatch
+    NETWATCH_SCRIPT="/etc/netwatch/hg680pctl.sh"
+    mkdir -p /etc/netwatch
+
+    cat > "$NETWATCH_SCRIPT" <<'EOF'
+#!/bin/sh
+PING_TARGET="bing.com"
+
+if ping -c 1 -W 2 "$PING_TARGET" >/dev/null 2>&1; then
+    /usr/bin/hg680pctl power heart
+    /usr/bin/hg680pctl lan disko
+else
+    /usr/bin/hg680pctl power off
+    /usr/bin/hg680pctl lan off
+fi
+EOF
+    chmod +x "$NETWATCH_SCRIPT"
+
+    # Tambahkan cron untuk cek setiap menit (bukan 30 detik)
+    if ! crontab -l | grep -q "$NETWATCH_SCRIPT"; then
+        (crontab -l 2>/dev/null; log_status "*/1 * * * * $NETWATCH_SCRIPT") | crontab -
+    fi
+    
+    /etc/init.d/cron enable
+    /etc/init.d/cron restart
+
+else
+    log_status "[WARN] /usr/bin/hg680pctl tidak ditemukan, skip autostart & netwatch" >&2
+fi
+else
+    log_status "INFO" "luci-app-amlogic not detected"
+    rm -f '/exit 0/i \/usr\/bin\/hg680pctl power heart &' /etc/rc.local
+    rm -f '/exit 0/i \/usr\/bin\/hg680pctl lan disko &' /etc/rc.local
+fi
 
 # add TTL
 log_status "INFO" "Adding and running TTL script..."
@@ -298,7 +368,7 @@ for pkg in luci-app-openclash luci-app-nikki luci-app-passwall; do
                     log_status "WARNING" "ocpatch.sh not found"
                 fi
                 
-                ln -sf /etc/openclash/history/quenx.db /etc/openclash/cache.db 2>/dev/null
+                ln -sf /etc/openclash/history/CrashWrt.db /etc/openclash/cache.db 2>/dev/null
                 ln -sf /etc/openclash/core/clash_meta /etc/openclash/clash 2>/dev/null
                 rm -f /etc/config/openclash 2>/dev/null
                 rm -rf /etc/openclash/custom /etc/openclash/game_rules 2>/dev/null
@@ -312,11 +382,11 @@ for pkg in luci-app-openclash luci-app-nikki luci-app-passwall; do
                 ln -sf /etc/openclash/proxy_provider /etc/nikki/run 2>/dev/null
                 ln -sf /etc/openclash/rule_provider /etc/nikki/run 2>/dev/null
                 sed -i '64s/Enable/Disable/' /etc/config/alpha 2>/dev/null
-                sed -i '170s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
+                sed -i '170s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
                 ;;
             luci-app-passwall)
                 sed -i '88s/Enable/Disable/' /etc/config/alpha 2>/dev/null
-                sed -i '171s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
+                sed -i '171s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
                 ;;
         esac
     else
@@ -326,19 +396,19 @@ for pkg in luci-app-openclash luci-app-nikki luci-app-passwall; do
                 rm -f /etc/config/openclash1 2>/dev/null
                 rm -rf /etc/openclash /usr/share/openclash /usr/lib/lua/luci/view/openclash 2>/dev/null
                 sed -i '104s/Enable/Disable/' /etc/config/alpha 2>/dev/null
-                sed -i '167s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
-                sed -i '187s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
-                sed -i '188s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
+                sed -i '167s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
+                sed -i '187s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
+                sed -i '188s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
                 ;;
             luci-app-nikki)
                 rm -rf /etc/config/nikki /etc/nikki 2>/dev/null
                 sed -i '120s/Enable/Disable/' /etc/config/alpha 2>/dev/null
-                sed -i '168s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
+                sed -i '168s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
                 ;;
             luci-app-passwall)
                 rm -f /etc/config/passwall 2>/dev/null
                 sed -i '136s/Enable/Disable/' /etc/config/alpha 2>/dev/null
-                sed -i '169s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/argon/header.htm 2>/dev/null
+                sed -i '169s#.*#<!-- & -->#' /usr/lib/lua/luci/view/themes/alpha/header.htm 2>/dev/null
                 ;;
         esac
     fi
