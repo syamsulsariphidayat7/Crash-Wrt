@@ -1,0 +1,88 @@
+#!/bin/sh
+# Nama: hg680pcl
+# Kontrol LED Power & LAN HG680P dengan anti tabrakan mode + cek mode sama
+
+# GPIO pin definitions
+PIN_POWER_ON=521
+PIN_POWER_OFF=517
+PIN_LAN_ON=547
+PIN_LAN_OFF=548
+
+# Warna Patterns
+OFF="0 1 0.5 0 0 0.5"
+NORMAL="1 0 0.5 0 0 0.5"
+HEART="1 1 0.4 1 0 0.4 0 0 0.5"
+DISKO="1 1 0.1 1 0 0.1 0 0 0.2"
+
+PID_DIR="/tmp/hg680pcl"
+mkdir -p "$PID_DIR"
+
+gpio_export() {
+    [ ! -e /sys/class/gpio/gpio$1 ] && echo $1 > /sys/class/gpio/export
+    echo out > /sys/class/gpio/gpio$1/direction
+}
+
+run_pattern() {
+    local PIN_ON=$1
+    local PIN_OFF=$2
+    local PATTERN=$3
+    while true; do
+        set -- $PATTERN
+        while [ $# -gt 0 ]; do
+            echo $1 > /sys/class/gpio/gpio$PIN_ON/value
+            echo $2 > /sys/class/gpio/gpio$PIN_OFF/value
+            shift 2
+            sleep $1
+            shift 1
+        done
+    done
+}
+
+gpio_export $PIN_POWER_ON
+gpio_export $PIN_POWER_OFF
+gpio_export $PIN_LAN_ON
+gpio_export $PIN_LAN_OFF
+
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 {power|lan} {off|normal|heart|disko}"
+    exit 1
+fi
+
+TARGET=$1
+MODE=$2
+
+case $MODE in
+    off)    PATTERN="$OFF" ;;
+    normal) PATTERN="$NORMAL" ;;
+    heart)  PATTERN="$HEART" ;;
+    disko)  PATTERN="$DISKO" ;;
+    *)      echo "Mode tidak dikenal"; exit 1 ;;
+esac
+
+case $TARGET in
+    power) PIN_ON=$PIN_POWER_ON; PIN_OFF=$PIN_POWER_OFF ;;
+    lan)   PIN_ON=$PIN_LAN_ON; PIN_OFF=$PIN_LAN_OFF ;;
+    *)     echo "Target tidak dikenal"; exit 1 ;;
+esac
+
+# File untuk PID & mode
+PID_FILE="$PID_DIR/$TARGET.pid"
+MODE_FILE="$PID_DIR/$TARGET.mode"
+
+# Cek apakah sudah jalan dengan mode yang sama
+if [ -f "$PID_FILE" ] && [ -f "$MODE_FILE" ]; then
+    OLD_PID=$(cat "$PID_FILE")
+    OLD_MODE=$(cat "$MODE_FILE")
+    if [ "$OLD_MODE" = "$MODE" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        echo "hg680pcl: $TARGET sudah jalan dengan mode $MODE"
+        exit 0
+    fi
+    # Kalau beda mode atau proses mati → stop yang lama
+    [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
+    rm -f "$PID_FILE" "$MODE_FILE"
+fi
+
+# Jalankan di background & simpan PID dan mode
+(run_pattern $PIN_ON $PIN_OFF "$PATTERN") &
+echo $! > "$PID_FILE"
+echo "$MODE" > "$MODE_FILE"

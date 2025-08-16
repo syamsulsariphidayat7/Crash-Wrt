@@ -8,7 +8,8 @@ proxy-providers:
       interval: '180'
 proxy-groups:
 - name: AUTO-MIX
-  type: fallback
+  type: load-balance
+  strategy: round-robin
   disable-udp: false
   use:
   - MIX

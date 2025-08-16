@@ -1,0 +1,200 @@
+#!/bin/bash
+
+# Fibocom L850/L860 Network Information
+# version : v1.1.1
+# Author  : Lutfa Ilham
+
+DEVICE="/dev/ttyACM2"
+REFRESH_RATE=3
+
+while getopts i:d: flag; do
+  case "${flag}" in
+    i)
+      REFRESH_RATE=${OPTARG}
+      ;;
+    d)
+      DEVICE=${OPTARG}
+      ;;
+  esac
+done
+
+check_requirements() {
+  if ! which atinout; then
+    not_installed="atinout"
+  fi
+  if [[ -n ${not_installed} ]]; then
+    echo -e "Requirements needed: ${not_installed}"
+    exit 1
+  fi
+}
+
+at_modem() {
+  echo "${1}" | atinout - ${DEVICE} -
+}
+
+ch_to_band() {
+  if [ $1 -ge 0 ] && [ $1 -le 599 ]; then
+    SC=B1
+  elif [ $1 -ge 600 ] && [ $1 -le 1199 ]; then
+    SC=B2
+  elif [ $1 -ge 1200 ] && [ $1 -le 1949 ]; then
+    SC=B3
+  elif [ $1 -ge 1950] && [ $1 -le 2399 ]; then
+    SC=B4
+  elif [ $1 -ge 2400] && [ $1 -le 2469 ]; then
+    SC=B5
+  elif [ $1 -ge 2750 ] && [ $1 -le 3449 ]; then
+    SC=B7
+  elif [ $1 -ge 3450 ] && [ $1 -le 3799 ]; then
+    SC=B8
+  elif [ $1 -ge 6150 ] && [ $1 -le 6449 ]; then
+    SC=B2
+  elif [ $1 -ge 9210 ] && [ $1 -le 9659 ]; then
+    SC=B28
+  elif [ $1 -ge 9870 ] && [ $1 -le 9919 ]; then
+    SC=B31
+  elif [ $1 -ge 37750 ] && [ $1 -le 38249 ]; then
+    SC=B38
+  elif [ $1 -ge 38650 ] && [ $1 -le 39649 ]; then
+    SC=B40
+  else
+    SC=B0
+  fi
+}
+
+get_info() {
+  INITIALIZE=$(at_modem "ATE0")
+  MODEL=$(at_modem "AT+CGMM?" | awk -F [:,] '/\+CGMM:/{gsub("\r",""); gsub("\"",""); print $3}')
+  OPERATOR_CODE=$(at_modem "AT+COPS=3,2;+COPS?" | awk -F [:,] '/\+COPS:/{gsub("\r",""); gsub("\"", ""); print $4}')
+  OPERATOR=$(at_modem "AT+COPN" | grep "\"${OPERATOR_CODE}\"" | awk -F [:,] '/\+COPN:/{gsub("\r",""); gsub("\"",""); print $3}')
+  if [[ -z ${OPERATOR} ]]; then
+    OPERATOR=${OPERATOR_CODE}
+  fi
+  DISTANCE=$(at_modem "AT+XMCI=1" | awk -F [:,] '/\+XMCI: 4/{gsub(/"/,""); printf "%.2f\n", ($14*78)/1000}')
+  LTE_MAIN_BAND=$(at_modem "AT+XLEC?" | awk -F [:_] '/\+XLEC:/{gsub("\r",""); print $4}' | awk -F [:,] '{print "B"$1}')
+  LTE_Cx=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{print $3}')
+  LTE_CA=$(($LTE_Cx -1))
+  case $LTE_CA in
+    1)
+      SCx=$(at_modem "AT+RSRP?" | awk -F [:,] '/\+RSRP:/{print $6}')
+      BWCx=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{gsub("\r",""); print $4" "$5}')
+      ;;
+    2)
+      SCx=$(at_modem "AT+RSRP?" | awk -F [:,] '/\+RSRP:/{print $6" "$9}')
+      BWCx=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{gsub("\r",""); print $4" "$5" "$6}')
+      ;;
+    3)
+      SCx=$(at_modem | "AT+RSRP?" | awk -F [:,] '/\+RSRP:/{print $6" "$9" "$12}')
+      BWCx=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{gsub("\r",""); print $4" "$5" "$6" "$7}')
+      ;;
+    4)
+      SCx=$(at_modem "AT+RSRP?" | awk -F [:,] '/\+RSRP:/{print $6" "$9" "$12" "$15}')
+      BWCx=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{gsub("\r",""); print $4" "$5" "$6" "$7" "$8}')
+      ;;
+  esac
+  # reset value first
+  LTE_CA_BAND=""
+  BWCA=0
+  BWCA_INFO=""
+  for ca in $BWCx; do
+    case $ca in
+      1)
+        N=3
+        ;;
+      2)
+        N=5
+        ;;
+      3)
+        N=10
+        ;;
+      4)
+        N=15
+        ;;
+      5)
+        N=20
+        ;;
+      *)
+        N=0
+        ;;
+    esac
+    BWCA=$(($BWCA+$N))
+    [[ -z ${BWCA_INFO} ]] && BWCA_INFO="${N}" || BWCA_INFO="${BWCA_INFO}+${N}"
+  done
+  [[ ${BWCA} -gt 0 ]] && BWCA="(${BWCA} MHz)" || BWCA=""
+  BWCA_INFO="(${BWCA_INFO} MHz)"
+  for sca in $SCx; do
+    ch_to_band $sca 2> /dev/null
+    LTE_CA_BAND=$LTE_CA_BAND+$SC
+  done
+  LTE_BAND="${LTE_MAIN_BAND}${LTE_CA_BAND}"
+  if ! at_modem "AT+CREG?" | awk -F [:,] '/\+CREG:/{gsub("\r",""); print $2}' | grep -q 2; then
+    at_modem "AT+CREG=2" > /dev/null 2>&1
+  fi
+  CID=$(echo $((16#$(at_modem "AT+CREG?" | awk -F [:,] '/\+CREG:/{gsub("\r",""); gsub("\"",""); print $5}'))))
+  SINR=$(at_modem "AT+XMCI=1" | awk -F [:,] '/\+XMCI: 4/{gsub(/"/,""); printf "%.0f\n", $13/4+5}')
+  RSRP=$(at_modem "AT+RSRP?" | awk -F [:,] '/\+RSRP:/{printf "%.0f\n", $4}')
+  RSRQ=$(at_modem "AT+RSRQ?" | awk -F [:,] '/\+RSRQ:/{printf "%.0f\n", $4}')
+  BWDL=$(at_modem "AT+XLEC?" | awk -F [:,] '/\+XLEC:/{gsub("\r",""); print $4}')
+  case $BWDL in
+    1)
+      NP=15
+      ;;
+    2)
+      NP=25
+      ;;
+    3)
+      NP=50
+      ;;
+    4)
+      NP=75
+      ;;
+    5)
+      NP=100
+      ;;
+    *)
+      NP=0
+      ;;
+  esac
+  CSQ=$(echo ${RSRP} ${NP} | awk '{printf "%.0f\n", (($1+10*log(12*$2)/log(10))+113)/2}')
+  CSQ_RSSI=$((2 * CSQ - 113))
+  if [ $CSQ -ge 0 -a $CSQ -le 31 ]; then
+    CSQ_PER=$(($CSQ * 100/31))
+  elif [ $CSQ -ge 32 -a $CSQ -le 50 ]; then
+    CSQ_PER="100"
+  else
+    CSQ_PER="0"
+  fi
+  CHIP_TEMP=$(at_modem "AT+MTSM=1" | awk -F [:,] '/\+MTSM:/{gsub(" ",""); print $2}')
+  IP_ADDRESS=$(at_modem AT+CGPADDR | awk -F [,] '/^\+CGPADDR: 1/{gsub("\"|\r",""); print $2}'| sed 's/[[:space:]]//g')
+  IMEI=$(at_modem "AT+CGSN" | awk '{if(NR==2) print $0}')
+  IMSI=$(at_modem "AT+CIMI" | awk '{if(NR==2) print $0}')
+  [[ -z ${IMSI} ]] && IMSI="SIM not detected"
+}
+
+print_info() {
+  get_info
+  echo -e "############### Fibocom ${MODEL} ###############"
+  echo -e "Operator\t: ${OPERATOR} (${CSQ_PER}%) ~${DISTANCE} Km"
+  echo -e "LTE Band\t: ${LTE_BAND} ${BWCA_INFO}"
+  echo -e "CID\t\t: ${CID}"
+  echo -e "RSSI\t\t: ${CSQ_RSSI}\tdBm"
+  echo -e "SINR [DL]\t: ${SINR}\tdB"
+  echo -e "RSRP [UL]\t: ${RSRP}\tdBm"
+  echo -e "RSRQ [WL]\t: ${RSRQ}\tdB"
+  echo -e "IMEI\t\t: ${IMEI}"
+  echo -e "IMSI\t\t: ${IMSI}"
+  echo -e "IP\t\t:" ${IP_ADDRESS}
+  echo -e "Temperature\t: ${CHIP_TEMP}\t°C"
+  echo -e "############################################"
+}
+
+loop_print_info() {
+  check_requirements
+  while true; do
+    reset
+    print_info
+    sleep $REFRESH_RATE
+  done
+}
+
+loop_print_info

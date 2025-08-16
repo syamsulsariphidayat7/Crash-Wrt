@@ -1,0 +1,61 @@
+#!/bin/sh /etc/rc.common
+# Service: hg680pcls
+# Monitor koneksi dengan ping dan kontrol LED HG680P via hg680pcl
+
+START=99
+STOP=10
+SERVICE_DAEMONIZE=1
+SERVICE_WRITE_PID=1
+SERVICE_PID_FILE=/tmp/hg680pcls.pid
+STATE_FILE=/tmp/hg680pcls.state
+
+USE_PROCD=1
+
+start_service() {
+    config_load hg680pcls
+    config_get enabled settings enabled
+    config_get target_host settings target_host
+    config_get interval settings interval
+
+    [ "$enabled" = "1" ] || {
+        echo "hg680pcls: disabled via UCI"
+        return 1
+    }
+
+    [ -z "$target_host" ] && target_host="104.17.156.243"  # Default target host
+    [ -z "$interval" ] && interval="5"
+
+    procd_open_instance
+    procd_set_param command /bin/sh -c "
+        echo \$\$ > $SERVICE_PID_FILE
+        last_state=\"\"
+        while true; do
+            if ping -c1 -W1 \"$target_host\" >/dev/null 2>&1; then
+                new_state=\"up\"
+            else
+                new_state=\"down\"
+            fi
+
+            if [ \"\$new_state\" != \"\$last_state\" ]; then
+                if [ \"\$new_state\" = \"up\" ]; then
+                    /usr/bin/hg680pcl power heart
+                    /usr/bin/hg680pcl lan disko
+                else
+                    /usr/bin/hg680pcl power off
+                    /usr/bin/hg680pcl lan off
+                fi
+                echo \"\$new_state\" > $STATE_FILE
+                last_state=\"\$new_state\"
+                logger -t hg680pcls \"Status berubah ke \$new_state (host: $target_host)\"
+            fi
+
+            sleep $interval
+        done
+    "
+    procd_set_param respawn
+    procd_close_instance
+}
+
+stop_service() {
+    rm -f "$SERVICE_PID_FILE" "$STATE_FILE"
+}

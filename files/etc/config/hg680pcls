@@ -1,0 +1,4 @@
+config hg680pcls 'settings'
+    option enabled '1'
+    option target_host '104.17.156.243'
+    option interval '5'

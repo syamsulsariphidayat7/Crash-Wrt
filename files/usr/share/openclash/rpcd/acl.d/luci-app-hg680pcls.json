@@ -1,0 +1,15 @@
+{
+  "luci-app-hg680pcls": {
+    "description": "Allow LuCI to manage hg680pcls config",
+    "read": {
+      "uci": [ "hg680pcls" ],
+      "file": {
+        "/tmp/hg680pcls.pid": [ "read" ],
+        "/tmp/hg680pcls.state": [ "read" ]
+      }
+    },
+    "write": {
+      "uci": [ "hg680pcls" ]
+    }
+  }
+}

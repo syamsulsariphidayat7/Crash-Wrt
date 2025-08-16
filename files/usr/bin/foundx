@@ -116,6 +116,13 @@ get_system_info() {
     
     host=$(cat /proc/device-tree/model 2>/dev/null | tr -d '\0' || hostname 2>/dev/null || echo "Unknown")
     [ -z "$host" ] && host="Unknown"
+
+    # Mapping khusus
+    case "$host" in
+    "Amlogic Meson GXL (S905X) P212 Development Board")
+        host="Amlogic STB-HG680P (S905X) - Crash-Wrt"
+        ;;
+    esac
     
     kernel=$(uname -r 2>/dev/null || echo "Unknown")
     [ -z "$kernel" ] && kernel="Unknown"
