@@ -18,21 +18,21 @@ EXCLUDED=""
 # Core system + Web Server + LuCI
 PACKAGES+=" libc bash block-mount coreutils-base64 coreutils-sleep coreutils-stat coreutils-stty \
 curl wget-ssl tar unzip parted losetup uhttpd uhttpd-mod-ubus luci luci-base \
-luci-mod-admin-full luci-lib-ip luci-compat luci-ssl nano"
+luci-mod-admin-full luci-lib-ip luci-compat luci-ssl nano python3-pip jq"
 
 # USB + LAN Networking Drivers And Modem Tools
 PACKAGES+=" kmod-usb-net-rtl8150 kmod-usb-net-rtl8152 kmod-usb-net-asix kmod-usb-net-asix-ax88179"
 PACKAGES+=" kmod-mii kmod-usb-net kmod-usb-wdm kmod-usb-net-rndis kmod-usb-net-cdc-ether kmod-usb-net-cdc-ncm kmod-usb-net-sierrawireless \
 kmod-usb-net-qmi-wwan uqmi kmod-usb-acm kmod-usb-net-huawei-cdc-ncm kmod-usb-net-cdc-mbim umbim \
-kmod-usb-serial-option kmod-usb-serial kmod-usb-serial-wwan kmod-usb-serial-qualcomm kmod-usb-serial-sierrawireless modemmanager luci-proto-modemmanager \
+kmod-usb-serial-option kmod-usb-serial kmod-usb-serial-wwan kmod-usb-serial-qualcomm kmod-usb-serial-sierrawireless -modemmanager -luci-proto-modemmanager \
 mbim-utils qmi-utils usbutils luci-proto-qmi luci-proto-ncm kmod-usb-uhci kmod-usb-ohci kmod-usb2 \
 kmod-usb3 usb-modeswitch xmm-modem kmod-nls-utf8 kmod-macvlan"
 
 # Modem Management Tools
-PACKAGES+=" modeminfo luci-app-modeminfo atinout modemband luci-app-modemband sms-tool luci-app-sms-tool-js picocom minicom"
+PACKAGES+=" -modeminfo -luci-app-modeminfo atinout modemband luci-app-modemband sms-tool luci-app-sms-tool-js picocom minicom"
 
 # ModemInfo Serial Support
-PACKAGES+=" modeminfo-serial-dell modeminfo-serial-fibocom modeminfo-serial-sierra modeminfo-serial-tw modeminfo-serial-xmm"
+# PACKAGES+=" modeminfo-serial-dell modeminfo-serial-fibocom modeminfo-serial-sierra modeminfo-serial-tw modeminfo-serial-xmm"
 
 # VPN Tunnel
 OPENCLASH="coreutils-nohup bash ca-certificates ipset ip-full libcap libcap-bin ruby ruby-yaml kmod-tun kmod-inet-diag kmod-nft-tproxy luci-app-openclash"
@@ -65,7 +65,7 @@ PACKAGES+=" internet-detector internet-detector-mod-modem-restart luci-app-inter
 PACKAGES+=" tailscale luci-app-tailscale"
 
 # Bandwidth + Speedtest
-PACKAGES+=" speedtest-cli luci-app-eqosplus"
+PACKAGES+=" speedtest-cli"
 
 # Theme + UI
 PACKAGES+=" luci-theme-material -luci-theme-argon luci-theme-alpha luci-app-alpha-config"
@@ -75,7 +75,7 @@ PACKAGES+=" php8 php8-fastcgi php8-fpm php8-mod-session php8-mod-ctype php8-mod-
 
 # Misc Packages + Custom Packages
 MISC+=" zoneinfo-core zoneinfo-asia jq httping adb openssh-sftp-server zram-swap htop \
-screen lolcat atc-fib-l850_gl atc-fib-fm350_gl luci-proto-atc luci-app-mmconfig -luci-app-droidnet -luci-app-ipinfo \
+screen lolcat atc-fib-l850_gl atc-fib-fm350_gl luci-proto-atc -luci-app-mmconfig -luci-app-droidnet -luci-app-ipinfo \
 -luci-app-lite-watchdog luci-app-mactodong luci-app-poweroffdevice luci-app-ramfree luci-app-tinyfm luci-app-ttyd luci-app-3ginfo-lite"
 
 # Profil Name
@@ -102,10 +102,10 @@ configure_profile_packages() {
 # Packages Base
 configure_release_packages() {
     if [[ "${BASE:-}" == "openwrt" ]]; then
-        MISC+=" wpad-openssl iw iwinfo wireless-regdb kmod-cfg80211 kmod-mac80211 luci-app-temp-status"
+        MISC+=" -wpad-openssl -iw -iwinfo -wireless-regdb -kmod-cfg80211 -kmod-mac80211 luci-app-temp-status"
         EXCLUDED+=" -dnsmasq"
     elif [[ "${BASE:-}" == "immortalwrt" ]]; then
-        MISC+=" wpad-openssl iw iwinfo wireless-regdb kmod-cfg80211 kmod-mac80211"
+        MISC+=" wpad-openssl iw iwinfo wireless-regdb -kmod-cfg80211 -kmod-mac80211"
         EXCLUDED+=" -dnsmasq -cpusage -automount -libustream-openssl -default-settings-chn -luci-i18n-base-zh-cn"
         if [[ "${ARCH_2:-}" == "x86_64" ]] || [[ "${ARCH_3:-}" == "i386_pentium4" ]]; then
             EXCLUDED+=" -kmod-usb-net-rtl8152-vendor"

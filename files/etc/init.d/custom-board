@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+START=95
+
+start() {
+    if [ -f /etc/board.json ]; then
+        model_id=$(jsonfilter -e '@.model.id' < /etc/board.json)
+        if [ "$model_id" = "amlogic,p212" ]; then
+            model_name=$(jsonfilter -e '@.model.name' < /etc/board.json)
+            echo "$model_name" > /tmp/sysinfo/model
+        fi
+    fi
+}

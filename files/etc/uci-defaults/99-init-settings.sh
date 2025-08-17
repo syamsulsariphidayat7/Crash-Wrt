@@ -105,49 +105,49 @@ uci commit dhcp 2>/dev/null
 log_status "SUCCESS" "IPv6 disabled on LAN"
 
 # configure wireless device
-log_status "INFO" "Configuring wireless devices..."
-uci set wireless.@wifi-device[0].disabled='0' 2>/dev/null
-uci set wireless.@wifi-iface[0].disabled='0' 2>/dev/null
-uci set wireless.@wifi-iface[0].mode='ap' 2>/dev/null
-uci set wireless.@wifi-iface[0].encryption='psk2' 2>/dev/null
-uci set wireless.@wifi-iface[0].key='crash' 2>/dev/null
-uci set wireless.@wifi-device[0].country='ID' 2>/dev/null
+# log_status "INFO" "Configuring wireless devices..."
+# uci set wireless.@wifi-device[0].disabled='0' 2>/dev/null
+# uci set wireless.@wifi-iface[0].disabled='0' 2>/dev/null
+# uci set wireless.@wifi-iface[0].mode='ap' 2>/dev/null
+# uci set wireless.@wifi-iface[0].encryption='psk2' 2>/dev/null
+# uci set wireless.@wifi-iface[0].key='crash' 2>/dev/null
+# uci set wireless.@wifi-device[0].country='ID' 2>/dev/null
 
 # check for Raspberry Pi Devices
-if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo 2>/dev/null; then
-    log_status "INFO" "Raspberry Pi 3/4 detected, configuring 5GHz WiFi..."
-    uci set wireless.@wifi-iface[0].ssid='Crash-Wrt_5G' 2>/dev/null
-    uci set wireless.@wifi-device[0].channel='149' 2>/dev/null
-    uci set wireless.@wifi-device[0].htmode='VHT80' 2>/dev/null
-else
-    uci set wireless.@wifi-iface[0].ssid='Crash-Wrt' 2>/dev/null
-    uci set wireless.@wifi-device[0].channel='1' 2>/dev/null
-    uci set wireless.@wifi-device[0].htmode='HT20' 2>/dev/null
-    log_status "INFO" "Standard WiFi configuration applied"
-fi
+# if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo 2>/dev/null; then
+#     log_status "INFO" "Raspberry Pi 3/4 detected, configuring 5GHz WiFi..."
+#     uci set wireless.@wifi-iface[0].ssid='Crash-Wrt_5G' 2>/dev/null
+#     uci set wireless.@wifi-device[0].channel='149' 2>/dev/null
+#     uci set wireless.@wifi-device[0].htmode='VHT80' 2>/dev/null
+# else
+#     uci set wireless.@wifi-iface[0].ssid='Crash-Wrt' 2>/dev/null
+#     uci set wireless.@wifi-device[0].channel='1' 2>/dev/null
+#     uci set wireless.@wifi-device[0].htmode='HT20' 2>/dev/null
+#     log_status "INFO" "Standard WiFi configuration applied"
+# fi
 
-uci commit wireless 2>/dev/null
-wifi reload >/dev/null 2>&1
-wifi up >/dev/null 2>&1
-log_status "SUCCESS" "Wireless configuration completed"
+# uci commit wireless 2>/dev/null
+# wifi reload >/dev/null 2>&1
+# wifi up >/dev/null 2>&1
+# log_status "SUCCESS" "Wireless configuration completed"
 
 # check wireless interface
-if iw dev 2>/dev/null | grep -q Interface; then
-    log_status "SUCCESS" "Wireless interface detected"
-    if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo 2>/dev/null; then
-        if ! grep -q "wifi up" /etc/rc.local 2>/dev/null; then
-            sed -i '/exit 0/i # remove if you dont use wireless' /etc/rc.local 2>/dev/null
-            sed -i '/exit 0/i sleep 10 && wifi up' /etc/rc.local 2>/dev/null
-        fi
-        if ! grep -q "wifi up" /etc/crontabs/root 2>/dev/null; then
-            echo "# remove if you dont use wireless" >> /etc/crontabs/root 2>/dev/null
-            echo "0 */12 * * * wifi down && sleep 5 && wifi up" >> /etc/crontabs/root 2>/dev/null
-            /etc/init.d/cron restart >/dev/null 2>&1
-        fi
-    fi
-else
-    log_status "WARNING" "No wireless device detected"
-fi
+# if iw dev 2>/dev/null | grep -q Interface; then
+#     log_status "SUCCESS" "Wireless interface detected"
+#     if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo 2>/dev/null; then
+#         if ! grep -q "wifi up" /etc/rc.local 2>/dev/null; then
+#             sed -i '/exit 0/i # remove if you dont use wireless' /etc/rc.local 2>/dev/null
+#             sed -i '/exit 0/i sleep 10 && wifi up' /etc/rc.local 2>/dev/null
+#         fi
+#         if ! grep -q "wifi up" /etc/crontabs/root 2>/dev/null; then
+#             echo "# remove if you dont use wireless" >> /etc/crontabs/root 2>/dev/null
+#             echo "0 */12 * * * wifi down && sleep 5 && wifi up" >> /etc/crontabs/root 2>/dev/null
+#             /etc/init.d/cron restart >/dev/null 2>&1
+#         fi
+#     fi
+# else
+#     log_status "WARNING" "No wireless device detected"
+# fi
 
 # remove huawei me909s and dw5821e usb-modeswitch
 log_status "INFO" "Removing Huawei ME909S and DW5821E USB modeswitch entries..."
@@ -198,6 +198,7 @@ sed -i -e 's/\[ -f \/etc\/banner \] && cat \/etc\/banner/#&/' -e 's/\[ -n \"\$FA
 chmod -R +x /sbin /usr/bin 2>/dev/null
 # chmod +x /etc/init.d/vnstat_backup 2>/dev/null
 chmod +x /etc/init.d/issue 2>/dev/null
+chmod +x /usr/bin/xmm75xx-info 2>/dev/null
 chmod +x /usr/lib/ModemManager/connection.d/10-report-down 2>/dev/null
 chmod +x /www/cgi-bin/reset-vnstat.sh /www/vnstati/vnstati.sh 2>/dev/null
 chmod 600 /etc/vnstat.conf 2>/dev/null
@@ -224,7 +225,6 @@ rm -f /etc/hotplug.d/tty/25-modemmanager-tty 2>/dev/null
 log_status "SUCCESS" "Auto sync, cache settings, remove mm tty applied"
 
 # setup device amlogic
-# /etc/uci-defaults/99-hg680pctl.sh
 # Autostart LED mode + Netwatch untuk HG680P
 
 log_status "INFO" "Checking for Amlogic device configuration..."
@@ -232,54 +232,23 @@ if opkg list-installed 2>/dev/null | grep -q luci-app-amlogic; then
     log_status "INFO" "luci-app-amlogic detected"
     rm -f /etc/profile.d/30-sysinfo.sh 2>/dev/null
     
-log_status "[INFO] Mengatur hg680pctl..."
+    log_status "[INFO] Mengatur hg680pcl..."
 
-# Pastikan file hg680pctl ada
-if [ -f /usr/bin/hg680pctl ]; then
-    chmod +x /usr/bin/hg680pctl
-
-    # Autostart di rc.local
-    if ! grep -q '/usr/bin/hg680pctl power heart' /etc/rc.local; then
-        sed -i '/exit 0/i \/usr\/bin\/hg680pctl power heart &' /etc/rc.local
+    # Pastikan file hg680pcl ada
+    if [ -f /usr/bin/hg680pcl ]; then
+        chmod +x /usr/bin/hg680pcl
+        chmod +x /etc/init.d/hg680pcls
+        chmod 644 /etc/config/hg680pcls
+        /etc/init.d/hg680pcls enable
+        /etc/init.d/hg680pcls start
     fi
-    if ! grep -q '/usr/bin/hg680pctl lan disko' /etc/rc.local; then
-        sed -i '/exit 0/i \/usr\/bin\/hg680pctl lan disko &' /etc/rc.local
-    fi
-
-    # Buat script netwatch
-    NETWATCH_SCRIPT="/etc/netwatch/hg680pctl.sh"
-    mkdir -p /etc/netwatch
-
-    cat > "$NETWATCH_SCRIPT" <<'EOF'
-#!/bin/sh
-PING_TARGET="bing.com"
-
-if ping -c 1 -W 2 "$PING_TARGET" >/dev/null 2>&1; then
-    /usr/bin/hg680pctl power heart
-    /usr/bin/hg680pctl lan disko
-else
-    /usr/bin/hg680pctl power off
-    /usr/bin/hg680pctl lan off
-fi
-EOF
-    chmod +x "$NETWATCH_SCRIPT"
-
-    # Tambahkan cron untuk cek setiap menit (bukan 30 detik)
-    if ! crontab -l | grep -q "$NETWATCH_SCRIPT"; then
-        (crontab -l 2>/dev/null; log_status "*/1 * * * * $NETWATCH_SCRIPT") | crontab -
-    fi
-    
-    /etc/init.d/cron enable
-    /etc/init.d/cron restart
-
-else
-    log_status "[WARN] /usr/bin/hg680pctl tidak ditemukan, skip autostart & netwatch" >&2
-fi
 else
     log_status "INFO" "luci-app-amlogic not detected"
-    rm -f '/exit 0/i \/usr\/bin\/hg680pctl power heart &' /etc/rc.local
-    rm -f '/exit 0/i \/usr\/bin\/hg680pctl lan disko &' /etc/rc.local
 fi
+
+# custom board amlogic
+chmod +x /etc/init.d/custom-board
+/etc/init.d/custom-board enable
 
 # add TTL
 log_status "INFO" "Adding and running TTL script..."
@@ -335,6 +304,7 @@ log_status "SUCCESS" "VnStat directory created"
 log_status "INFO" "Restarting Netdata and VnStat services..."
 /etc/init.d/netdata restart >/dev/null 2>&1
 /etc/init.d/vnstat restart >/dev/null 2>&1
+sleep 60; /etc/init.d/rakitiw restart >/dev/null 2>&1
 log_status "SUCCESS" "Services restarted"
 
 # run vnstati.sh

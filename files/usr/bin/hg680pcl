@@ -1,0 +1,117 @@
+#!/bin/sh
+
+# GPIO pin POWER
+PIN_POWER_ON=521
+PIN_POWER_OFF=517
+# GPIO pin LAN
+PIN_LAN_ON=547
+PIN_LAN_OFF=548
+
+PID_DIR="/tmp/hg680p_led"
+mkdir -p "$PID_DIR"
+
+# ========== GPIO CONTROL ==========
+set_gpio() {
+    local pin="$1" val="$2"
+    [ ! -d "/sys/class/gpio/gpio${pin}" ] && printf "%s" "$pin" > /sys/class/gpio/export 2>/dev/null || true
+    sleep 0.02
+    printf "out" > "/sys/class/gpio/gpio${pin}/direction" 2>/dev/null || true
+    printf "%s" "$val" > "/sys/class/gpio/gpio${pin}/value" 2>/dev/null || true
+}
+
+reset_gpio() {
+    set_gpio "$1" 0
+    set_gpio "$2" 0
+}
+
+# ========== PATTERN ENGINE ==========
+# Format step: "PIN_ON:PIN_OFF:DURATION"
+run_pattern() {
+    local pin_on="$1" pin_off="$2"; shift 2
+    trap "reset_gpio \"$pin_on\" \"$pin_off\"; exit" TERM INT
+
+    while true; do
+        for step in "$@"; do
+            IFS=: read v_on v_off dur <<EOF
+$step
+EOF
+            set_gpio "$pin_on" "$v_on"
+            set_gpio "$pin_off" "$v_off"
+            sleep "$dur"
+        done
+    done
+}
+
+# ========== MODES ==========
+mode_off() {      # loop mati → merah
+    run_pattern "$1" "$2" \
+        "0:0:0.5" \
+        "0:1:0.5"
+}
+mode_on() {       # loop mati → hijau
+    run_pattern "$1" "$2" \
+        "0:0:0.5" \
+        "1:0:0.5"
+}
+mode_heart() {    # loop mati → kuning → hijau
+    run_pattern "$1" "$2" \
+        "0:0:0.3" \
+        "1:1:0.2" \
+        "1:0:0.3"
+}
+mode_disko() {    # loop mati → kuning → hijau
+    run_pattern "$1" "$2" \
+        "0:0:0.1" \
+        "1:1:0.1" \
+        "1:0:0.1"
+}
+
+# ========== MODE HANDLER ==========
+stop_mode() {
+    local name="$1" pid_file="$PID_DIR/${name}.pid"
+    [ -f "$pid_file" ] && kill "$(cat "$pid_file")" 2>/dev/null || true
+    rm -f "$pid_file"
+    case "$name" in
+        power) reset_gpio "$PIN_POWER_ON" "$PIN_POWER_OFF" ;;
+        lan)   reset_gpio "$PIN_LAN_ON" "$PIN_LAN_OFF" ;;
+    esac
+}
+
+start_mode() {
+    local name="$1" mode="$2" pin_on="$3" pin_off="$4"
+    stop_mode "$name"
+
+    case "$mode" in
+        off)
+            mode_off "$pin_on" "$pin_off" &
+            echo $! > "$PID_DIR/${name}.pid"
+            ;;
+        on)
+            mode_on "$pin_on" "$pin_off" &
+            echo $! > "$PID_DIR/${name}.pid"
+            ;;
+        heart)
+            mode_heart "$pin_on" "$pin_off" &
+            echo $! > "$PID_DIR/${name}.pid"
+            ;;
+        disko)
+            mode_disko "$pin_on" "$pin_off" &
+            echo $! > "$PID_DIR/${name}.pid"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+}
+
+usage() {
+    echo "Usage: $0 {power|lan} {off|on|heart|disko}" >&2
+    exit 1
+}
+
+# ========== MAIN ==========
+case "$1" in
+    power) start_mode power "$2" "$PIN_POWER_ON" "$PIN_POWER_OFF" ;;
+    lan)   start_mode lan   "$2" "$PIN_LAN_ON" "$PIN_LAN_OFF" ;;
+    *)     usage ;;
+esac

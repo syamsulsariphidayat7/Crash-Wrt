@@ -233,10 +233,10 @@ jobs:
             - OpenClash + Nikki + Passwall
             - No Tunnel         
             ## KERNEL STABLE VERSION
-            - Kernel v5.15 ⨯ WIFI ON
-            - Kernel v6.1 ⨯ WIFI ON
-            - Kernel v6.6 ⨯ WIFI ON
-            - Kernel v6.12 ⨯ WIFI ON
+            - Kernel v5.15
+            - Kernel v6.1
+            - Kernel v6.6
+            - Kernel v6.12
 
   build-firmware:
     name: Build ${{ matrix.target }} Firmware
@@ -671,11 +671,11 @@ jobs:
         if: steps.beforeupload.outputs.status == 'success'
         run: |
           echo "✅ Build and upload completed for ${{ matrix.target }}"
-          echo "⏰ Waiting 5 seconds before next build starts..."
+          echo "⏰ Waiting 10 seconds before next build starts..."
           echo "🕐 Start time: $(date)"
           
-          # Jeda 5 detik
-          sleep 5
+          # Jeda 10 detik
+          sleep 10
           
           echo "✅ Wait completed!"
           echo "🕐 End time: $(date)"

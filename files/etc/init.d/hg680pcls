@@ -1,0 +1,37 @@
+#!/bin/sh /etc/rc.common
+# Service untuk memantau ping dan kontrol LED HG680P
+START=99
+STOP=10
+USE_PROCD=1
+SERVICE_NAME="hg680pcls"
+LED_SCRIPT="/usr/bin/hg680pcl"
+
+start_service() {
+    procd_open_instance
+    procd_set_param command /bin/sh -c "
+        ping_targets=\$(uci get hg680pcls.settings.ping_targets 2>/dev/null || echo '8.8.8.8 1.1.1.1 104.17.156.243')
+        interval=\$(uci get hg680pcls.settings.interval 2>/dev/null || echo 5)
+        power_mode=\$(uci get hg680pcls.settings.power_mode 2>/dev/null || echo 'heart')
+        lan_mode=\$(uci get hg680pcls.settings.lan_mode 2>/dev/null || echo 'disko')
+        while true; do
+            reachable=0
+            for host in \$ping_targets; do
+                ping -c 1 -W 1 \$host >/dev/null 2>&1 && reachable=1 && break
+            done
+            if [ \"\$reachable\" -eq 1 ]; then
+                $LED_SCRIPT power \$power_mode
+                $LED_SCRIPT lan \$lan_mode
+            else
+                $LED_SCRIPT power off
+                $LED_SCRIPT lan off
+            fi
+            sleep \$interval
+        done
+    "
+    procd_set_param respawn
+    procd_close_instance
+}
+
+stop_service() {
+    true
+}

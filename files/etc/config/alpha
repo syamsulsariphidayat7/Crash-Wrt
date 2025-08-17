@@ -6,19 +6,19 @@ config theme 'theme'
 	option nav_01 '/cgi-bin/luci/admin/network/network'
 
 config navbar
-	option name Overview
-	option enable Disable
-	option line 1
-	option newtab No
-	option icon /www/luci-static/alpha/gaya/icon/navbar/overview.png
-	option address /cgi-bin/luci/admin/status/overview
-	option blur 0
-	option nav_01 /cgi-bin/luci/admin/modem/main
-	option nav_02 /cgi-bin/luci/admin/modem/main
-	option nav_03 /cgi-bin/luci/admin/modem/main
-	option nav_04 /cgi-bin/luci/admin/modem/main
-	option nav_05 /cgi-bin/luci/admin/modem/main
-	option nav_06 /cgi-bin/luci/admin/modem/main
+	option name 'Overview'
+	option enable 'Disable'
+	option line '1'
+	option newtab 'No'
+	option icon '/www/luci-static/alpha/gaya/icon/navbar/overview.png'
+	option address '/cgi-bin/luci/admin/status/overview'
+	option blur '0'
+	option nav_01 '/cgi-bin/luci/admin/modem/main'
+	option nav_02 '/cgi-bin/luci/admin/modem/main'
+	option nav_03 '/cgi-bin/luci/admin/modem/main'
+	option nav_04 '/cgi-bin/luci/admin/modem/main'
+	option nav_05 '/cgi-bin/luci/admin/modem/main'
+	option nav_06 '/cgi-bin/luci/admin/modem/main'
 	option color '#2222359a'
 
 config navbar
@@ -116,12 +116,11 @@ config navbar
 	option nav_05 '/cgi-bin/luci/admin/modem/main'
 	option nav_06 '/cgi-bin/luci/admin/modem/main'
 	option color '#2222359a'
-	
+
 config navbar
-	option name 'rakitan'
+	option name 'Net Detector'
 	option enable 'Enable'
 	option line '1'
 	option newtab 'No'
 	option icon '/www/luci-static/alpha/gaya/icon/navbar/rakitanmanager.png'
-	option address '/cgi-bin/luci/admin/modem/rakitan'
-
+	option address '/cgi-bin/luci/admin/services/internet-detector'

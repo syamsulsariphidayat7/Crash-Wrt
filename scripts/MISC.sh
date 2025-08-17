@@ -69,15 +69,15 @@ configure_amlogic_permissions() {
             "/lib/netifd/proto/ncm.sh"
             "/lib/netifd/proto/atc.sh"
             "/lib/netifd/proto/wwan.sh"
-            "/lib/netifd/wireless/mac80211.sh"
+            # "/lib/netifd/wireless/mac80211.sh"
             "/lib/netifd/dhcp-get-server.sh"
             "/lib/netifd/dhcp.script"
             "/lib/netifd/dhcpv6.script"
             "/lib/netifd/hostapd.sh"
             "/lib/netifd/netifd-proto.sh"
-            "/lib/netifd/netifd-wireless.sh"
+            # "/lib/netifd/netifd-wireless.sh"
             "/lib/netifd/utils.sh"
-            "/lib/wifi/mac80211.sh"
+            # "/lib/wifi/mac80211.sh"
         )
         
         for file in "${netifd_files[@]}"; do

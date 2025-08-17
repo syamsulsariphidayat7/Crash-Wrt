@@ -23,14 +23,14 @@ REPOS+=(
 # Define package categories with improved structure
 declare -a packages_custom
 packages_custom+=(
-    "modeminfo_|${REPOS[KIDDIN9]}"
-    "luci-app-modeminfo_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-tw_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-dell_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-sierra_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-xmm_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-fibocom_|${REPOS[KIDDIN9]}"
-    "modeminfo-serial-sierra_|${REPOS[KIDDIN9]}"
+    # "modeminfo_|${REPOS[KIDDIN9]}"
+    # "luci-app-modeminfo_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-tw_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-dell_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-sierra_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-xmm_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-fibocom_|${REPOS[KIDDIN9]}"
+    # "modeminfo-serial-sierra_|${REPOS[KIDDIN9]}"
     #"luci-app-mmconfig_|${REPOS[OPENWRTRU]}"
     
     "atinout_|${REPOS[KIDDIN9]}"
@@ -55,7 +55,7 @@ packages_custom+=(
     #"luci-app-irqbalance_|${REPOS[IMMORTALWRT]}/luci"
     
     "speedtest-cli_|${REPOS[KIDDIN9]}"
-    "luci-app-eqosplus_|${REPOS[KIDDIN9]}"
+    # "luci-app-eqosplus_|${REPOS[KIDDIN9]}"
     "luci-app-internet-detector_|${REPOS[KIDDIN9]}"
     "internet-detector_|${REPOS[KIDDIN9]}"
     "internet-detector-mod-modem-restart_|${REPOS[KIDDIN9]}"
