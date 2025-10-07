@@ -64,8 +64,8 @@ packages_custom+=(
     
     "luci-app-tinyfm_|https://api.github.com/repos/bobbyunknown/luci-app-tinyfm/releases/latest"
     "luci-app-droidnet_|https://api.github.com/repos/animegasan/luci-app-droidmodem/releases/latest"
-    "luci-theme-alpha_|https://api.github.com/repos/derisamedia/luci-theme-alpha/releases/latest"
-    "luci-app-alpha-config_|https://api.github.com/repos/derisamedia/luci-theme-alpha/releases/latest"
+    "luci-theme-alpha_|https://api.github.com/repos/derisamedia/luci-theme-alpha/releases/tags/3.9.7"
+    "luci-app-alpha-config_|https://api.github.com/repos/derisamedia/luci-theme-alpha/releases/tags/3.9.7"
     "luci-app-tailscale_|https://api.github.com/repos/asvow/luci-app-tailscale/releases/latest"
     "luci-app-ipinfo_|https://api.github.com/repos/bobbyunknown/luci-app-ipinfo/releases/latest"
 )
